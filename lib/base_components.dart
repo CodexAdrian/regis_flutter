@@ -35,7 +35,7 @@ class SubcardWithIcon extends StatelessWidget {
                 left: 4,
                 right: 8,
               ),
-              child: Text(text, style: theme.subcardStyle()),
+              child: Text(text, style: theme.subCardStyle()),
             ),
           ],
         ),
@@ -65,7 +65,7 @@ class Subcard extends StatelessWidget {
             bottom: 5,
             right: 10,
           ),
-          child: Text(text, style: theme.subcardStyle()),
+          child: Text(text, style: theme.subCardStyle()),
         ),
       ),
     );
@@ -125,7 +125,7 @@ class TitleSubcard extends StatelessWidget {
   final Color fontColor;
   final Color color;
 
-  const TitleSubcard({Key? key, required this.text, this.fontColor = RegisColors.lightFont, this.color = RegisColors.regisRed}) : super(key: key);
+  const TitleSubcard({Key? key, required this.text, this.fontColor = RegisColors.darkText, this.color = RegisColors.regisRed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

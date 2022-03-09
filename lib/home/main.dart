@@ -64,11 +64,11 @@ class RegisHomeState extends State<RegisHomePage> {
           backgroundColor: RegisColors.regisRed,
           title: Text(
             widget.title,
-            style: const TextStyle(color: RegisColors.lightFont),
+            style: const TextStyle(color: RegisColors.darkText),
           ),
           actions: <Widget>[
             IconButton(
-              color: RegisColors.lightFont,
+              color: RegisColors.darkText,
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Notification Center Implementation')));
               },

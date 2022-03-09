@@ -4,12 +4,12 @@ import 'package:flutter/cupertino.dart';
 
 class RegisColors {
   static const Color lightBg = Color(0xFFF9EDED);
-  static const Color lightFont = Color(0xFFFFFFFF);
-  static const Color lightSubFont = Color(0xFFAEA8CE);
+  static const Color darkText = Color(0xFFFFFFFF);
+  static const Color darkSubCardText = Color(0xFFAEA8CE);
   static const Color lightCard = Color(0xFFEEDEDE);
   static const Color darkBg = Color(0xFF20182D);
-  static const Color darkFont = Color(0xFF2D1818);
-  static const Color darkSubFont = Color(0xFF714F4F);
+  static const Color lightText = Color(0xFF2D1818);
+  static const Color lightSubCardText = Color(0xFF714F4F);
   static const Color regisRed = Color(0xFFd61341);
   static const Color selector = Color(0xffdc6a6a);
   static const Color regisDarkRed = Color(0xFFbb0e35);
@@ -61,7 +61,7 @@ class RegisTheme {
     );
   }
 
-  TextStyle subcardStyle() {
+  TextStyle subCardStyle() {
     return TextStyle(
       color: font,
       fontSize: 14,
@@ -78,16 +78,16 @@ class RegisTheme {
 
 const RegisTheme darkTheme = RegisTheme(
   background: RegisColors.darkBg,
-  font: RegisColors.lightFont,
-  subFont: RegisColors.lightSubFont,
+  font: RegisColors.darkText,
+  subFont: RegisColors.darkSubCardText,
   card: RegisColors.darkCard,
   subCard: RegisColors.darkSubCard
 
 );
 const RegisTheme lightTheme = RegisTheme(
   background: RegisColors.lightBg,
-  font: RegisColors.darkFont,
-  subFont: RegisColors.darkSubFont,
+  font: RegisColors.lightText,
+  subFont: RegisColors.lightSubCardText,
   card: RegisColors.lightCard,
   subCard: RegisColors.lightSubCard
 );

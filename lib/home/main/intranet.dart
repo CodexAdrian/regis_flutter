@@ -75,7 +75,7 @@ class IntranetState extends State<IntranetPage> {
                         child: Icon(
                           Icons.sports_baseball_outlined,
                           size: stampSize * .8,
-                          color: RegisColors.lightFont,
+                          color: RegisColors.darkText,
                         ),
                       )),
                 ),
