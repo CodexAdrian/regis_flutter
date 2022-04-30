@@ -11,7 +11,8 @@ import 'package:regis_flutter/home/main/intranet.dart';
 import 'package:regis_flutter/home/main/moodle.dart';
 import 'package:regis_flutter/home/registheme.dart';
 
-import 'login/auth.dart';
+import 'home/login/auth.dart';
+
 
 Future<ByteData> loadAsset() async {
   return await rootBundle.load('assets/avatar.webp');
@@ -145,7 +146,7 @@ class TokenTest extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<dynamic>(
-      future: tryLogin(username, password),
+      future: tryLogin(username(), password()),
       builder: (content, snapshot) {
         if (snapshot.hasError) {
           return const Text('An Error has Ocurred');
