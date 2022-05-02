@@ -32,15 +32,21 @@ class RegisApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: const Color(0xFFd61341),
-        backgroundColor: const Color(0xFF20182D),
-        cardColor: const Color(0xFF343046),
+        backgroundColor: const Color(0xFF1A1A1A),
+        cardColor: const Color(0xFF393939),
         fontFamily: 'Sans Serif',
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           headline1: TextStyle(
-            fontSize: 30,
-            fontFamily: "Sans Serif",
-            fontWeight: FontWeight.bold,
-          )
+            fontSize: 35,
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+          subtitle1: TextStyle(
+            fontSize: 18,
+            color: Color(0x88FFFFFF),
+            fontWeight: FontWeight.w300,
+
+          ),
         )
       ),
       /*
@@ -52,7 +58,7 @@ class RegisApp extends StatelessWidget {
           } else if(snapshot.hasData) {
             String token = snapshot.data ?? "error";
             if(token == "error") return const SplashPage();
-            return MoodlePage(theme: darkTheme, token: token,);
+            return RegisHomePage(title: "Regos",);
           } else {
             return const SplashPage();
           }
