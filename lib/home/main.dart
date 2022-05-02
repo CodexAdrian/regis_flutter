@@ -1,17 +1,16 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:regis_flutter/base_components.dart';
-import 'package:regis_flutter/home/login/login.dart';
-import 'package:regis_flutter/home/login/loginapi.dart';
+import 'package:regis_flutter/home/api/loginapi.dart';
 import 'package:regis_flutter/home/main/intranet.dart';
 import 'package:regis_flutter/home/main/moodle.dart';
+import 'package:regis_flutter/home/pages/splashpage.dart';
 import 'package:regis_flutter/home/registheme.dart';
 
-import 'home/login/auth.dart';
+import 'api/auth.dart';
 
 
 Future<ByteData> loadAsset() async {
@@ -30,7 +29,37 @@ class RegisApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: RegisHomePage(title: 'Dashboard',),
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFFd61341),
+        backgroundColor: const Color(0xFF20182D),
+        cardColor: const Color(0xFF343046),
+        fontFamily: 'Sans Serif',
+        textTheme: TextTheme(
+          headline1: TextStyle(
+            fontSize: 30,
+            fontFamily: "Sans Serif",
+            fontWeight: FontWeight.bold,
+          )
+        )
+      ),
+      /*
+      home: FutureBuilder<String>(
+        future: getToken(),
+        builder: (context, snapshot) {
+          if(snapshot.hasError) {
+            return SplashPage();
+          } else if(snapshot.hasData) {
+            String token = snapshot.data ?? "error";
+            if(token == "error") return const SplashPage();
+            return MoodlePage(theme: darkTheme, token: token,);
+          } else {
+            return const SplashPage();
+          }
+        },
+      ),
+       */
+      home: SplashPage()
       //home: RegisHomePage(title: 'Dashboard'),
     );
   }
@@ -46,12 +75,25 @@ class RegisHomePage extends StatefulWidget {
 
 class RegisHomeState extends State<RegisHomePage> {
   bool darkMode = true;
+  int currentPage = 0;
 
   void flipMode() {
     setState(() {
       darkMode = !darkMode;
     });
   }
+
+  void setPage(int page) {
+    setState(() {
+      currentPage = page;
+    });
+  }
+
+  var pages = const <Widget>[
+    Text("Page 1"),
+    TokenTest(theme: darkTheme),
+    SplashPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -61,61 +103,28 @@ class RegisHomeState extends State<RegisHomePage> {
       child: Scaffold(
         backgroundColor: theme.background,
         appBar: AppBar(
+          toolbarHeight: 75,
           elevation: 5,
           backgroundColor: RegisColors.regisRed,
-          title: Text(
-            widget.title,
-            style: const TextStyle(color: RegisColors.darkText),
-          ),
-          actions: <Widget>[
-            IconButton(
-              color: RegisColors.darkText,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Notification Center Implementation')));
-              },
-              icon: const Icon(Icons.notifications_outlined),
-            ),
-            IconButton(
-              iconSize: 30,
-              onPressed: () {
-                flipMode();
-              },
-              icon: const CircleAvatar(
-                radius: 16,
-                backgroundImage: NetworkImage('https://cdn.discordapp.com/attachments/817413688771608587/918182744159297576/1ff374a2b9fd0e41c0a70d9f17f24fd5.webp'),
-              ),
-            ),
-          ],
-          bottom: const DecorativeTabBar(
-            tabBar: TabBar(
-              indicatorColor: RegisColors.selector,
-              tabs: [
-                Tab(text: 'Intranet'),
-                Tab(text: 'Moodle'),
-                Tab(text: 'Library'),
-              ],
-            ),
-            decoration: BoxDecoration(
-              color: RegisColors.regisDarkRed,
-            ),
+          title: Image.asset(
+              "assets/wordmark.png",
+              height: 55,
           ),
         ),
-        body: TabBarView(
-          children: [
-            IntranetPage(theme: theme),
-            TokenTest(theme: theme),
-            LoadingScreen()
-          ],
+        body: Center(
+          child: pages[currentPage]
         ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: theme.background,
+          backgroundColor: RegisColors.regisDarkRed,
           elevation: 0,
-          selectedItemColor: RegisColors.regisRed,
-          unselectedItemColor: theme.font,
+          selectedItemColor: theme.font,
+          unselectedItemColor: RegisColors.regisRed,
+          onTap: setPage,
+          currentIndex: currentPage,
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
-            BottomNavigationBarItem(icon: Icon(Icons.event_note), label: 'Calendar'),
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
+            BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Moodle'),
+            BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
           ],
         ),
       ),
@@ -145,13 +154,14 @@ class TokenTest extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
+    return FutureBuilder<String>(
       future: tryLogin(username(), password()),
       builder: (content, snapshot) {
         if (snapshot.hasError) {
           return const Text('An Error has Ocurred');
         } else if (snapshot.hasData) {
-          return MoodlePage(theme: theme, token: jsonDecode(snapshot.data)['token']);
+          String token = snapshot.data ?? "An Error has Occurred";
+          return token != "" ? MoodlePage(theme: theme, token: token) : const Text('An Error has Occurred');;
         } else {
           return LoadingScreen();
         }

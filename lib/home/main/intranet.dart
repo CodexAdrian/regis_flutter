@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:regis_flutter/base_components.dart';
 import 'package:regis_flutter/home/registheme.dart';

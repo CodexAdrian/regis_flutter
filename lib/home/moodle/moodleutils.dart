@@ -31,7 +31,7 @@ Future<List<MoodleClass>> getClasses(String token) async {
   Map<String, dynamic> userInfo = jsonDecode(userQuery);
   String classesQuery = await read(
       Uri.parse('https://moodle.regis.org/webservice/rest/server.php?wstoken=$token&wsfunction=core_enrol_get_users_courses&userid=${userInfo["userid"]}&moodlewsrestformat=json'));
-  List<dynamic> userClasses = jsonDecode(classesQuery);
+  var userClasses = jsonDecode(classesQuery);
   List<MoodleClass> classes = List.empty(growable: true);
 
   for(Map<String, dynamic> userClass in userClasses) {
