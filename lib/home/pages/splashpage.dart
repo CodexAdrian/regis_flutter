@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -47,14 +48,17 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         children: const [
           SplashCard(
             title: "Ease of Use",
+            iconPath: "assets/icons/calendar.json",
             description: "Noble Heart is designed to simplify the online experience for you",
           ),
           SplashCard(
             title: "Ease of Use",
+            iconPath: "assets/icons/calendar.json",
             description: "Noble Heart is designed to simplify the online experience for you",
           ),
           SplashCard(
             title: "Ease of Use",
+            iconPath: "assets/icons/calendar.json",
             description: "Noble Heart is designed to simplify the online experience for you",
           ),
         ],
@@ -66,8 +70,9 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
 class SplashCard extends StatelessWidget {
   final String title;
   final String description;
+  final String iconPath;
 
-  const SplashCard({Key? key, required this.title, required this.description}) : super(key: key);
+  const SplashCard({Key? key, required this.title, required this.description, required this.iconPath}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +90,7 @@ class SplashCard extends StatelessWidget {
                   SizedBox(
                     height: 300,
                     width: 300,
-                    child: SvgPicture.asset("assets/icons/smartphone.svg"),
+                    child: Lottie.asset(iconPath),
                   ),
                 ],
               ),
