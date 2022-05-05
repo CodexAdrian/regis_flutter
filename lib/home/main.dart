@@ -7,11 +7,11 @@ import 'package:regis_flutter/base_components.dart';
 import 'package:regis_flutter/home/api/loginapi.dart';
 import 'package:regis_flutter/home/main/intranet.dart';
 import 'package:regis_flutter/home/main/moodle.dart';
+import 'package:regis_flutter/home/pages/schedule.dart';
 import 'package:regis_flutter/home/pages/splashpage.dart';
 import 'package:regis_flutter/home/registheme.dart';
 
 import 'api/auth.dart';
-
 
 Future<ByteData> loadAsset() async {
   return await rootBundle.load('assets/avatar.webp');
@@ -28,28 +28,39 @@ class RegisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: const Color(0xFFd61341),
-        backgroundColor: const Color(0xFF1A1A1A),
-        cardColor: const Color(0xFF393939),
-        fontFamily: 'Sans Serif',
-        textTheme: const TextTheme(
-          headline1: TextStyle(
-            fontSize: 35,
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ThemeData.dark().colorScheme.copyWith(
+                primary: const Color(0xFFd61341),
+                background: const Color(0xFF1A1A1A),
+              ),
+          brightness: Brightness.dark,
+          primaryColor: const Color(0xFFd61341),
+          cardColor: const Color(0xFF393939),
+          fontFamily: 'Sans Serif',
+          textTheme: const TextTheme(
+            headline1: TextStyle(
+              fontSize: 36,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+            headline2: TextStyle(
+              fontSize: 24,
+              color: Colors.white,
+              fontWeight: FontWeight.w400,
+            ),
+            headline3: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+              fontWeight: FontWeight.w300,
+            ),
+            subtitle1: TextStyle(
+              fontSize: 18,
+              color: Color(0x88FFFFFF),
+              fontWeight: FontWeight.w300,
+            ),
           ),
-          subtitle1: TextStyle(
-            fontSize: 18,
-            color: Color(0x88FFFFFF),
-            fontWeight: FontWeight.w300,
-
-          ),
-        )
-      ),
-      /*
+        ),
       home: FutureBuilder<String>(
         future: getToken(),
         builder: (context, snapshot) {
@@ -58,22 +69,21 @@ class RegisApp extends StatelessWidget {
           } else if(snapshot.hasData) {
             String token = snapshot.data ?? "error";
             if(token == "error") return const SplashPage();
-            return RegisHomePage(title: "Regos",);
+            return RegisHomePage();
           } else {
             return const SplashPage();
           }
         },
       ),
-       */
-      home: SplashPage()
-      //home: RegisHomePage(title: 'Dashboard'),
-    );
+
+        //home: SplashPage()
+        //home: RegisHomePage(),
+        );
   }
 }
 
 class RegisHomePage extends StatefulWidget {
-  const RegisHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
+  const RegisHomePage({Key? key}) : super(key: key);
 
   @override
   State<RegisHomePage> createState() => RegisHomeState();
@@ -97,33 +107,30 @@ class RegisHomeState extends State<RegisHomePage> {
 
   var pages = const <Widget>[
     Text("Page 1"),
-    TokenTest(theme: darkTheme),
-    SplashPage(),
+    MoodlePage(),
+    Schedule(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    RegisTheme theme = darkMode ? darkTheme : lightTheme;
+    var theme = Theme.of(context);
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: theme.background,
         appBar: AppBar(
           toolbarHeight: 75,
           elevation: 5,
           backgroundColor: RegisColors.regisRed,
           title: Image.asset(
-              "assets/wordmark.png",
-              height: 55,
+            "assets/images/wordmark.png",
+            height: 55,
           ),
         ),
-        body: Center(
-          child: pages[currentPage]
-        ),
+        body: Center(child: pages[currentPage]),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: RegisColors.regisDarkRed,
           elevation: 0,
-          selectedItemColor: theme.font,
+          selectedItemColor: theme.textTheme.headline1?.color,
           unselectedItemColor: RegisColors.regisRed,
           onTap: setPage,
           currentIndex: currentPage,
@@ -151,27 +158,4 @@ class DecorativeTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => tabBar.preferredSize;
-}
-
-class TokenTest extends StatelessWidget {
-  final RegisTheme theme;
-
-  const TokenTest({Key? key, required this.theme}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: tryLogin(username(), password()),
-      builder: (content, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('An Error has Ocurred');
-        } else if (snapshot.hasData) {
-          String token = snapshot.data ?? "An Error has Occurred";
-          return token != "" ? MoodlePage(theme: theme, token: token) : const Text('An Error has Occurred');;
-        } else {
-          return LoadingScreen();
-        }
-      },
-    );
-  }
 }

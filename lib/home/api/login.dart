@@ -16,7 +16,6 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: widget.theme.background,
       body: Column(
         children: [
           const Expanded(child: Text('test')),

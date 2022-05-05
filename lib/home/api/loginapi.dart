@@ -6,22 +6,21 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 const tokenName = "moodleToken";
 
 Future<String> tryLogin(String username, String password) async {
+  final url = Uri.https("moodle.regis.org" ,"/login/token.php", {"username": username, "password": password, "service": "moodle_mobile_app"});
+  final response = await http.get(url);
   try{
-    final url = Uri.parse('https://moodle.regis.org/login/token.php?username=$username&password=$password&service=moodle_mobile_app');
-    final response = await http.read(url);
-    final token = jsonDecode(response)['token'];
+    final String token = jsonDecode(response.body)["token"];
     const storage = FlutterSecureStorage();
-    storage.write(key: tokenName, value: token);
+    await storage.write(key: tokenName, value: token);
     return token;
-  } on Exception catch(err) {
-    return "An Error has Occurred";
+  } catch(err) {
+    return "error";
   }
 }
 
 Future<String> getToken() async {
   const storage = FlutterSecureStorage();
   String token = await storage.read(key: tokenName) ?? "error";
-  print(token);
   return token;
 }
 
