@@ -17,7 +17,7 @@ class _ScheduleState extends State<Schedule> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    getScheduleDay();
+    getScheduleDays();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
