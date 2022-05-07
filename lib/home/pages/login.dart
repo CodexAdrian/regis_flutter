@@ -4,6 +4,8 @@ import 'package:regis_flutter/home/api/loginapi.dart';
 import 'package:regis_flutter/home/main.dart';
 import 'package:regis_flutter/home/pages/splashpage.dart';
 
+import 'homepage.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 

@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../api/scheduleapi.dart';
+import '../components/base_components.dart';
+
 class Schedule extends StatefulWidget {
   const Schedule({Key? key}) : super(key: key);
 
@@ -14,16 +17,15 @@ class _ScheduleState extends State<Schedule> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    getScheduleDay();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Today is H day",
-              style: theme.textTheme.headline2,
-              textAlign: TextAlign.left,
+            child: text(
+              "Today is H day", theme.textTheme.headline2!,
             ),
           ),
           SizedBox(

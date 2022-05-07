@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:regis_flutter/base_components.dart';
+import 'package:regis_flutter/home/components/base_components.dart';
 import 'package:regis_flutter/home/registheme.dart';
 
 class IntranetPage extends StatefulWidget {

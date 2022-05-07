@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'home/registheme.dart';
+import '../registheme.dart';
 
 class SubcardWithIcon extends StatelessWidget {
   final RegisTheme theme;

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:regis_flutter/home/api/loginapi.dart';
-import 'package:regis_flutter/home/main/moodle.dart';
 
 import '../registheme.dart';
 
@@ -14,10 +13,18 @@ class MoodleClass {
   Teacher teacher;
   String className;
   String description;
-  Image bannerImg;
+  String bannerImg;
   int id;
 
   MoodleClass({required this.teacher, required this.className, required this.description, required this.bannerImg, required this.id});
+
+  Map toJson() => {
+        "teacher": teacher.toJson(),
+        "name": className,
+        "description": description,
+        "banner": bannerImg,
+        "classId": id,
+      };
 }
 
 class Teacher {
@@ -27,6 +34,12 @@ class Teacher {
   int id;
 
   Teacher({required this.name, this.alias, required this.avatar, required this.id});
+
+  Map toJson() => {
+        "name": name,
+        "profileImage": avatar,
+        "teacherId": id,
+      };
 }
 
 Future<List<MoodleClass>> getClasses() async {
@@ -151,10 +164,10 @@ Future<MoodleClass> getClassFromId(int id) async {
         }
     }
   }
-  return MoodleClass(teacher: teacher, className: classInstance['displayname'], description: classInstance['displayname'], bannerImg: Image.network(imgBanner!), id: id);
+  return MoodleClass(teacher: teacher, className: classInstance['displayname'], description: classInstance['displayname'], bannerImg: imgBanner!, id: id);
 }
 
-Future<Widget> getClassContents(MoodleClass moodleClass, BuildContext context) async {
+Future<List<dynamic>> getClassContents(MoodleClass moodleClass, BuildContext context) async {
   var theme = Theme.of(context);
   final token = await getToken();
   String classContentString = await getStoredClass(moodleClass);
@@ -171,35 +184,7 @@ Future<Widget> getClassContents(MoodleClass moodleClass, BuildContext context) a
   }
 
   List<dynamic> classContent = jsonDecode(classContentString);
-  return ListView(
-    children: classContent.map((tab) {
-      List<dynamic> modules = tab['modules'];
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              FractionallySizedBox(
-                widthFactor: 1,
-                child: Text(
-                  tab['name'],
-                  style: theme.textTheme.headline3,
-                ),
-              ),
-              if (modules.isNotEmpty)
-                FractionallySizedBox(
-                  widthFactor: 1,
-                  child: Text(
-                    "${modules.length} Items",
-                    style: theme.textTheme.subtitle1,
-                  ),
-                )
-            ],
-          ),
-        ),
-      );
-    }).toList(),
-  );
+  return classContent;
 }
 
 Future<String> getStoredClass(MoodleClass moodleClass) async {
@@ -225,4 +210,10 @@ void storeClassContent(String content, MoodleClass moodleClass) {
   const storage = FlutterSecureStorage();
   storage.write(key: "timeStampOf${moodleClass.id}", value: DateTime.now().millisecondsSinceEpoch.toString());
   storage.write(key: "contentOf${moodleClass.id}", value: content);
+}
+
+void storeClassList(String list) {
+  const storage = FlutterSecureStorage();
+  storage.write(key: "timeListStored", value: DateTime.now().millisecondsSinceEpoch.toString());
+  storage.write(key: "classList", value: list);
 }
