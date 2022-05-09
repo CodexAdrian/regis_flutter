@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../registheme.dart';
@@ -6,7 +5,7 @@ import '../registheme.dart';
 class LoginScreen extends StatefulWidget {
   final RegisTheme theme;
 
-  LoginScreen({Key? key, required this.theme}) : super(key: key);
+  const LoginScreen({Key? key, required this.theme}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => LoginScreenState();

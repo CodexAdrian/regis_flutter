@@ -4,7 +4,7 @@ import 'package:regis_flutter/home/api/scheduleapi.dart';
 class ScheduleDisplay extends StatefulWidget {
   final List<ScheduleDay> scheduleDays;
 
-  const ScheduleDisplay({Key? key, required this.scheduleDays});
+  const ScheduleDisplay({Key? key, required this.scheduleDays}) : super(key: key);
 
   @override
   State<ScheduleDisplay> createState() => _ScheduleDisplayState();
@@ -47,7 +47,7 @@ class ScheduleCard extends StatelessWidget {
               ),
               child: SizedBox(
                 height: boxSize.toDouble(),
-                child: FractionallySizedBox(widthFactor: 1),
+                child: const FractionallySizedBox(widthFactor: 1),
               ),
             );
           } else {

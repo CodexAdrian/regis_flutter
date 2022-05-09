@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../registheme.dart';
@@ -87,13 +86,10 @@ class DropdownSubcard extends StatefulWidget {
 class DropdownSubcardState extends State<DropdownSubcard> {
   String value = '';
 
-  void updateVal(String newVal) {
-
-  }
+  void updateVal(String newVal) {}
 
   @override
   Widget build(BuildContext context) {
-
     return DropdownButton<String>(
       value: value,
       icon: const Icon(Icons.arrow_downward),
@@ -109,8 +105,7 @@ class DropdownSubcardState extends State<DropdownSubcard> {
           value = newValue!;
         });
       },
-      items: <String>['One', 'Two', 'Free', 'Four']
-          .map<DropdownMenuItem<String>>((String value) {
+      items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
@@ -118,7 +113,6 @@ class DropdownSubcardState extends State<DropdownSubcard> {
       }).toList(),
     );
   }
-
 }
 
 class TitleSubcard extends StatelessWidget {
@@ -159,13 +153,13 @@ class TitleSubcard extends StatelessWidget {
 Widget text(String string, TextStyle style) {
   return FractionallySizedBox(
     widthFactor: 1,
-    child: Container(
-      child: Text(string, textAlign: TextAlign.left, style: style),
-    ),
+    child: Text(string, textAlign: TextAlign.left, style: style),
   );
 }
 
 class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -178,31 +172,33 @@ class LoadingScreen extends StatelessWidget {
 }
 
 class RegisCard extends StatelessWidget {
-  final RegisTheme theme;
   final String? cardImg;
   final String? avatarImg;
   final String title;
   final String? subtitle;
+  final Map<Widget, Function()>? actions;
 
-  const RegisCard({Key? key, required this.theme, this.cardImg, this.avatarImg, required this.title, this.subtitle}) : super(key: key);
+  const RegisCard({Key? key, this.cardImg, this.avatarImg, required this.title, this.subtitle, this.actions}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
     return Card(
-      color: theme.card,
+      color: theme.cardColor,
       elevation: 1,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if(cardImg != null) AspectRatio(
-            aspectRatio: 2.2,
-            child: Container(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+          if (cardImg != null)
+            AspectRatio(
+              aspectRatio: 2.2,
+              child: Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+                ),
+                child: CachedNetworkImage(imageUrl: cardImg!),
               ),
-              child: CachedNetworkImage(imageUrl: cardImg!),
             ),
-          ),
           Container(
             margin: const EdgeInsets.only(
               top: 6,
@@ -212,20 +208,35 @@ class RegisCard extends StatelessWidget {
               widthFactor: .95,
               child: Row(
                 children: [
-                  if(avatarImg != null) Container(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+                  if (avatarImg != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: CachedNetworkImage(
+                        imageUrl: avatarImg!,
+                        imageBuilder: (ctx, imageBuilder) => CircleAvatar(
+                          radius: 24,
+                          backgroundImage: imageBuilder,
+                        ),
+                      ),
                     ),
-                    child: CachedNetworkImage(imageUrl: cardImg!),
-                  ),
                   Expanded(
                     child: Container(
                       margin: const EdgeInsets.all(10),
                       alignment: Alignment.centerLeft,
                       child: Column(
                         children: [
-                          text(title, theme.s1Style()),
-                          if(subtitle != null) text(subtitle!, theme.subhead1Style()),
+                          text(title, theme.textTheme.headline3!),
+                          if (subtitle != null) text(subtitle!, theme.textTheme.subtitle1!),
+                          Row(
+                            children: (actions?.entries.map(
+                                      (e) => ElevatedButton(
+                                        onPressed: e.value,
+                                        child: e.key,
+                                      ),
+                                    ) ??
+                                    List.empty())
+                                .toList(),
+                          )
                         ],
                       ),
                     ),

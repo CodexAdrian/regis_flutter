@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regis_flutter/home/pages/dashboard.dart';
 import 'package:regis_flutter/home/pages/schedule.dart';
 
 import 'moodle.dart';
@@ -27,7 +28,7 @@ class RegisHomeState extends State<RegisHomePage> {
   }
 
   var pages = const <Widget>[
-    Text("Page 1"),
+    Dashboard(),
     MoodlePage(),
     Schedule(),
   ];

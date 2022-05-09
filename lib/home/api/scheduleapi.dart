@@ -1,9 +1,4 @@
-
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:csv/csv.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quiver/collection.dart';
@@ -36,6 +31,12 @@ class ScheduleBlock {
 
 enum LetterDay {
   A, B, C, D, E, F, G, H
+}
+
+extension LetterDayExtension on LetterDay {
+  String toShortString() {
+    return toString().split(".").last;
+  }
 }
 
 Future<List<ScheduleDay>> getScheduleDays() async {
@@ -75,16 +76,16 @@ Future<List<ScheduleDay>> getScheduleDays() async {
   return scheduleDays;
 }
 
-Future<List<ScheduleDay>> getLetterDaySchedule() async{
+Future<Map<String, ScheduleDay>> getLetterDaySchedule() async{
   List<ScheduleDay> scheduleDays = await getScheduleDays();
-  List<ScheduleDay> finalSchedule = List.empty(growable: true);
+  Map<String, ScheduleDay> finalSchedule = {};
   for(var letterDay in LetterDay.values) {
     var tempList = scheduleDays.where((element) => element.letterDay == letterDay).toList();
     ScheduleDay? regularDay;
     for (var value in tempList) {
       if(regularDay == null || value.blocks.length > regularDay.blocks.length) regularDay = value;
     }
-    finalSchedule.add(regularDay!);
+    finalSchedule.addAll({regularDay!.letterDay.toShortString(): regularDay});
   }
   return finalSchedule;
 }
@@ -92,10 +93,10 @@ Future<List<ScheduleDay>> getLetterDaySchedule() async{
 Future<Map<String, ScheduleDay?>> getWeeklySchedule() async {
   final days = <String>["M", "T", "W", "TH", "F"];
   List<ScheduleDay> scheduleDays = await getScheduleDays();
-  Map<String, ScheduleDay?> finalDays = Map();
+  Map<String, ScheduleDay?> finalDays = {};
   DateTime startOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
   startOfWeek = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-  if(DateTime.now().weekday > 5) startOfWeek = startOfWeek.add(Duration(days: 7));
+  if(DateTime.now().weekday > 5) startOfWeek = startOfWeek.add(const Duration(days: 7));
   for(int i = 0; i <= 4; i++) {
     ScheduleDay? day;
     try{

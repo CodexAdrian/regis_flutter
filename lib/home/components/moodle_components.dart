@@ -25,16 +25,14 @@ class MoodleCard extends StatelessWidget {
           children: <Widget>[
             AspectRatio(
               aspectRatio: 2.2,
-              child: Container(
-                child: CachedNetworkImage(
-                  imageUrl: moodleClass.bannerImg,
-                  imageBuilder: (ctx, imgProvider) => Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
-                      image: DecorationImage(
-                        image: imgProvider,
-                        fit: BoxFit.cover,
-                      ),
+              child: CachedNetworkImage(
+                imageUrl: moodleClass.bannerImg,
+                imageBuilder: (ctx, imgProvider) => Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+                    image: DecorationImage(
+                      image: imgProvider,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
@@ -82,7 +80,7 @@ class MoodleCard extends StatelessWidget {
 class MoodleSubPage extends StatelessWidget {
   final MoodleClass moodleClass;
 
-  const MoodleSubPage({Key? key, required this.moodleClass});
+  const MoodleSubPage({Key? key, required this.moodleClass})  : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -109,12 +107,11 @@ class MoodleSubPage extends StatelessWidget {
         future: getClassContents(moodleClass, context),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            print(snapshot.error);
             return const Text("ERROR");
           } else if (snapshot.hasData) {
             return SubpageContents(contents: snapshot.data!);
           } else {
-            return LoadingScreen();
+            return const LoadingScreen();
           }
         },
       ),
@@ -125,7 +122,7 @@ class MoodleSubPage extends StatelessWidget {
 class SubpageContents extends StatelessWidget {
   final List<dynamic> contents;
 
-  const SubpageContents({Key? key, required this.contents});
+  const SubpageContents({Key? key, required this.contents}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +135,7 @@ class SubpageContents extends StatelessWidget {
           return Column(
             children: [
               TextButton.icon(
-                icon: Icon(Icons.folder),
+                icon: const Icon(Icons.folder),
                 onPressed: modules.isNotEmpty
                     ? () {
                         Navigator.push(
@@ -170,7 +167,7 @@ class SubpageContents extends StatelessWidget {
                   ),
                 ),
               ),
-              Divider()
+              const Divider()
             ],
           );
         }).toList(),
@@ -211,10 +208,8 @@ class ModulePage extends StatelessWidget {
               (module) {
                 if (module["description"] != null) {
                   htmlRegex.allMatches(module["description"]).forEach((element) {
-                    print(element.toString());
                   });
                 }
-                print(module["modname"]);
                 var moduleIcon = MoodleType.values.firstWhere((element) => element.toString() == "MoodleType.${module["modname"]}", orElse: () => MoodleType.notype);
                 return Column(
                   children: [
@@ -226,10 +221,10 @@ class ModulePage extends StatelessWidget {
                           title: Text(module["name"]),
                           content: module["description"] != null
                               ? Text(module["description"].toString().replaceAll("</h", "\n</").replaceAll(htmlRegex, "").replaceAll("&nbsp;", " "))
-                              : Text(""),
+                              : const Text(""),
                           actions: [
-                            TextButton(onPressed: () => launchUrl(Uri.parse(module["url"] + "")), child: Text("Open in Browser")),
-                            if(moduleIcon == MoodleType.resource && module["contentsinfo"]["mimetypes"][0] == "application/pdf") ElevatedButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => PDFModulePage(pdfUrl: module["contents"][0]["fileurl"], title: module["name"]),)), child: Text("Open PDF")),
+                            TextButton(onPressed: () => launchUrl(Uri.parse(module["url"] + "")), child: const Text("Open in Browser")),
+                            if(moduleIcon == MoodleType.resource && module["contentsinfo"]["mimetypes"][0] == "application/pdf") ElevatedButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => PDFModulePage(pdfUrl: module["contents"][0]["fileurl"], title: module["name"]),)), child: const Text("Open PDF")),
                           ],
                         ),
                       ),
@@ -248,7 +243,7 @@ class ModulePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Divider()
+                    const Divider()
                   ],
                 );
               },
@@ -263,7 +258,7 @@ class ModulePage extends StatelessWidget {
 class PDFModulePage extends StatelessWidget {
   final String pdfUrl;
   final String title;
-  const PDFModulePage({Key? key, required this.pdfUrl, required this.title});
+  const PDFModulePage({Key? key, required this.pdfUrl, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +277,7 @@ class PDFModulePage extends StatelessWidget {
             scrollDirection: Axis.vertical,
           );
         }
-        return LoadingScreen();
+        return const LoadingScreen();
       }),
     );
   }

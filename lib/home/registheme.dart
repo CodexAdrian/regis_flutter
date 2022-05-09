@@ -1,6 +1,4 @@
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class RegisColors {
   static const Color lightBg = Color(0xFFF9EDED);

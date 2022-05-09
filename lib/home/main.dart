@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show ByteData, rootBundle;
@@ -60,11 +58,11 @@ class RegisApp extends StatelessWidget {
         future: getToken(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return SplashPage();
+            return const SplashPage();
           } else if (snapshot.hasData) {
             String token = snapshot.data ?? "error";
             if (token == "error") return const SplashPage();
-            return RegisHomePage();
+            return const RegisHomePage();
           } else {
             return const SplashPage();
           }

@@ -2,14 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:regis_flutter/home/api/loginapi.dart';
-
-import '../registheme.dart';
 
 class MoodleClass {
   Teacher teacher;
@@ -19,29 +15,16 @@ class MoodleClass {
   int id;
 
   MoodleClass({required this.teacher, required this.className, required this.description, required this.bannerImg, required this.id});
-
-  Map toJson() => {
-        "teacher": teacher.toJson(),
-        "name": className,
-        "description": description,
-        "banner": bannerImg,
-        "classId": id,
-      };
 }
 
 class Teacher {
   String? alias;
   String name;
   String avatar;
+  String email;
   int id;
 
-  Teacher({required this.name, this.alias, required this.avatar, required this.id});
-
-  Map toJson() => {
-        "name": name,
-        "profileImage": avatar,
-        "teacherId": id,
-      };
+  Teacher({required this.name, this.alias, required this.avatar, required this.id, required this.email});
 }
 
 Future<List<MoodleClass>> getClasses() async {
@@ -52,7 +35,6 @@ Future<List<MoodleClass>> getClasses() async {
   if(timer != null) {
     if(int.parse(timer) - DateTime.now().millisecondsSinceEpoch < 216000000) {
       classesQuery = await storage.read(key: "classList");
-      print("Loaded from Storage");
     }
   }
   if(classesQuery == null) {
@@ -70,7 +52,6 @@ Future<List<MoodleClass>> getClasses() async {
       "moodlewsrestformat": "json",
     });
     classesQuery = await read(classesQueryHttps);
-    print("Loaded from Web");
     storeClassList(classesQuery);
   }
   var userClasses = jsonDecode(classesQuery);
@@ -92,7 +73,6 @@ Future<MoodleClass> getClassFromId(int id) async {
   if(classTimer != null) {
     if(int.parse(classTimer) - DateTime.now().millisecondsSinceEpoch < 216000000) {
       moodleClass = await storage.read(key: "class$id");
-      print("Loaded Class $id from Storage");
     }
   }
   if(moodleClass == null) {
@@ -113,7 +93,6 @@ Future<MoodleClass> getClassFromId(int id) async {
   if(teacherTimer != null) {
     if(int.parse(teacherTimer) - DateTime.now().millisecondsSinceEpoch < 216000000) {
       teacherInfo = await storage.read(key: "teacher$teacherID");
-      print("Loaded Teacher $id from Storage");
     }
   }
   if(teacherInfo == null) {
@@ -130,7 +109,7 @@ Future<MoodleClass> getClassFromId(int id) async {
   Map<String, dynamic> teacherData = jsonDecode(teacherInfo)[0];
   String teacherImg = teacherData['profileimageurl'] + '&token=$token';
   teacherImg = teacherImg.replaceFirst('/pluginfile.php', '/webservice/pluginfile.php');
-  Teacher teacher = Teacher(name: teacherData['fullname'], avatar: teacherImg, id: teacherID);
+  Teacher teacher = Teacher(name: teacherData['fullname'], avatar: teacherImg, id: teacherID, email: teacherData['email']);
   String? imgBanner;
   try {
     imgBanner = classInstance['overviewfiles'][0]['fileurl'] + '?token=$token';
@@ -206,7 +185,6 @@ Future<MoodleClass> getClassFromId(int id) async {
 }
 
 Future<List<dynamic>> getClassContents(MoodleClass moodleClass, BuildContext context) async {
-  var theme = Theme.of(context);
   final token = await getToken();
   String classContentString = await getStoredClass(moodleClass);
 

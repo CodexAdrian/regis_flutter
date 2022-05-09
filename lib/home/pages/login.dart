@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:regis_flutter/home/api/loginapi.dart';
-import 'package:regis_flutter/home/main.dart';
-import 'package:regis_flutter/home/pages/splashpage.dart';
 
 import 'homepage.dart';
 
@@ -78,10 +76,10 @@ class _LoginPageState extends State<LoginPage> {
                           return null;
                         },
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(borderSide: BorderSide()),
+                          border: const OutlineInputBorder(borderSide: BorderSide()),
                           focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: theme.primaryColor)),
                           hintText: "Username",
-                          prefixIcon: Icon(Icons.account_circle),
+                          prefixIcon: const Icon(Icons.account_circle),
                         ),
                       ),
                     ),
@@ -98,10 +96,10 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         obscureText: true,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(borderSide: BorderSide()),
+                          border: const OutlineInputBorder(borderSide: BorderSide()),
                           focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: theme.primaryColor)),
                           hintText: "Password",
-                          prefixIcon: Icon(Icons.lock),
+                          prefixIcon: const Icon(Icons.lock),
                         ),
                       ),
                     ),
@@ -121,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                         (value) => {
                           if (value != "error")
                             {
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => RegisHomePage())),
+                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => const RegisHomePage())),
                             }
                           else
                             {

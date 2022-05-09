@@ -1,10 +1,7 @@
-import 'dart:ui';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:regis_flutter/home/main.dart';
 import 'package:regis_flutter/home/pages/login.dart';
 
 class SplashPage extends StatefulWidget {
@@ -20,7 +17,7 @@ class _SplashPageState extends State<SplashPage> {
   int _current = 0;
   final CarouselController _controller = CarouselController();
 
-  List<Widget> imgList = [
+  List<Widget> imgList = const [
     SplashCard(title: "Manage your Profile", description: "Manage your profile and see upcoming events", iconPath: "assets/icons/profile.svg"),
     SplashCard(title: "Speedier Moodle", description: "Quickly view all your moodle classes and assignments", iconPath: "assets/icons/moodle.svg"),
     SplashCard(title: "Waaaaay Nicer Schedule", description: "Finally make your schedule easier to view on a mobile device", iconPath: "assets/icons/schedule.svg"),
@@ -69,7 +66,7 @@ class _SplashPageState extends State<SplashPage> {
               primary: theme.primaryColor,
             ),
             onPressed: () {
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (route) => false,);
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => const LoginPage()), (route) => false,);
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),

@@ -1,10 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:regis_flutter/home/api/moodleapi.dart';
-import 'package:regis_flutter/home/registheme.dart';
 
 import '../components/base_components.dart';
 import '../components/moodle_components.dart';
@@ -29,7 +25,7 @@ class _MoodlePageState extends State<MoodlePage> {
           return ListView(
               padding: const EdgeInsets.only(top: 5), children: [FractionallySizedBox(widthFactor: 0.95, child: Column(children: getMoodleCards(snapshot.data!)))]);
         } else {
-          return LoadingScreen();
+          return const LoadingScreen();
         }
       },
     );
