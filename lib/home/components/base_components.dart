@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -178,8 +179,8 @@ class LoadingScreen extends StatelessWidget {
 
 class RegisCard extends StatelessWidget {
   final RegisTheme theme;
-  final ImageProvider? cardImg;
-  final ImageProvider? avatarImg;
+  final String? cardImg;
+  final String? avatarImg;
   final String title;
   final String? subtitle;
 
@@ -196,10 +197,10 @@ class RegisCard extends StatelessWidget {
           if(cardImg != null) AspectRatio(
             aspectRatio: 2.2,
             child: Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
-                image: DecorationImage(fit: BoxFit.fitWidth, image: cardImg!),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
               ),
+              child: CachedNetworkImage(imageUrl: cardImg!),
             ),
           ),
           Container(
@@ -211,9 +212,11 @@ class RegisCard extends StatelessWidget {
               widthFactor: .95,
               child: Row(
                 children: [
-                  if(avatarImg != null) CircleAvatar(
-                    backgroundImage: avatarImg!,
-                    radius: 20,
+                  if(avatarImg != null) Container(
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+                    ),
+                    child: CachedNetworkImage(imageUrl: cardImg!),
                   ),
                   Expanded(
                     child: Container(

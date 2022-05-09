@@ -69,7 +69,7 @@ class _SplashPageState extends State<SplashPage> {
               primary: theme.primaryColor,
             ),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => LoginPage()));
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (route) => false,);
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),

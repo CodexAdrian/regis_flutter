@@ -1,4 +1,7 @@
+import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../api/moodleapi.dart';
 import 'base_components.dart';
@@ -23,9 +26,17 @@ class MoodleCard extends StatelessWidget {
             AspectRatio(
               aspectRatio: 2.2,
               child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
-                  image: DecorationImage(fit: BoxFit.fitWidth, image: Image.network(moodleClass.bannerImg).image),
+                child: CachedNetworkImage(
+                  imageUrl: moodleClass.bannerImg,
+                  imageBuilder: (ctx, imgProvider) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+                      image: DecorationImage(
+                        image: imgProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -38,9 +49,12 @@ class MoodleCard extends StatelessWidget {
                 widthFactor: .95,
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: moodleClass.teacher.avatar.image,
-                      radius: 20,
+                    CachedNetworkImage(
+                      imageUrl: moodleClass.teacher.avatar,
+                      imageBuilder: (ctx, imageBuilder) => CircleAvatar(
+                        radius: 20,
+                        backgroundImage: imageBuilder,
+                      ),
                     ),
                     Expanded(
                       child: Container(
@@ -81,7 +95,13 @@ class MoodleSubPage extends StatelessWidget {
           IconButton(
             iconSize: 30,
             onPressed: () {},
-            icon: CircleAvatar(radius: 16, backgroundImage: moodleClass.teacher.avatar.image),
+            icon: CachedNetworkImage(
+              imageUrl: moodleClass.teacher.avatar,
+              imageBuilder: (ctx, imageBuilder) => CircleAvatar(
+                radius: 16,
+                backgroundImage: imageBuilder,
+              ),
+            ),
           )
         ],
       ),
@@ -89,6 +109,7 @@ class MoodleSubPage extends StatelessWidget {
         future: getClassContents(moodleClass, context),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            print(snapshot.error);
             return const Text("ERROR");
           } else if (snapshot.hasData) {
             return SubpageContents(contents: snapshot.data!);
@@ -122,7 +143,7 @@ class SubpageContents extends StatelessWidget {
                     ? () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => ModulePage(modules: modules, title: tab['name'])),
+                          MaterialPageRoute(builder: (context) => ModulePage(modules: modules, title: tab['name'], summary: tab["summary"].toString().isNotEmpty ? tab["summary"] : null)),
                         );
                       }
                     : null,
@@ -161,11 +182,13 @@ class SubpageContents extends StatelessWidget {
 class ModulePage extends StatelessWidget {
   final List<dynamic> modules;
   final String title;
+  final String? summary;
 
-  const ModulePage({Key? key, required this.modules, required this.title}) : super(key: key);
+  const ModulePage({Key? key, required this.modules, required this.title, this.summary}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var htmlRegex = RegExp(r"<[^>]*>", caseSensitive: false, multiLine: true);
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -173,16 +196,134 @@ class ModulePage extends StatelessWidget {
         backgroundColor: theme.primaryColor,
       ),
       body: ListView(
-        children: modules.map(
-          (module) {
-            return Card(
+        children: [
+          if (summary != null)
+            Card(
+                child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Text(
-                module['name'],
+                summary!.replaceAll("</h", "\n</").replaceAll("</p", "\n</").replaceAll(htmlRegex, "").replaceAll("&nbsp;", " "),
+                style: theme.textTheme.headline3,
               ),
-            );
-          },
-        ).toList(),
+            )),
+          Column(
+            children: modules.map(
+              (module) {
+                if (module["description"] != null) {
+                  htmlRegex.allMatches(module["description"]).forEach((element) {
+                    print(element.toString());
+                  });
+                }
+                print(module["modname"]);
+                var moduleIcon = MoodleType.values.firstWhere((element) => element.toString() == "MoodleType.${module["modname"]}", orElse: () => MoodleType.notype);
+                return Column(
+                  children: [
+                    TextButton.icon(
+                      icon: moduleIcon.icon,
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (builder) => AlertDialog(
+                          title: Text(module["name"]),
+                          content: module["description"] != null
+                              ? Text(module["description"].toString().replaceAll("</h", "\n</").replaceAll(htmlRegex, "").replaceAll("&nbsp;", " "))
+                              : Text(""),
+                          actions: [
+                            TextButton(onPressed: () => launchUrl(Uri.parse(module["url"] + "")), child: Text("Open in Browser")),
+                            if(moduleIcon == MoodleType.resource && module["contentsinfo"]["mimetypes"][0] == "application/pdf") ElevatedButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => PDFModulePage(pdfUrl: module["contents"][0]["fileurl"], title: module["name"]),)), child: Text("Open PDF")),
+                          ],
+                        ),
+                      ),
+                      label: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          children: [
+                            FractionallySizedBox(
+                              widthFactor: 1,
+                              child: Text(
+                                module['name'],
+                                style: modules.isNotEmpty ? theme.textTheme.headline3 : theme.textTheme.subtitle1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Divider()
+                  ],
+                );
+              },
+            ).toList(),
+          ),
+        ],
       ),
     );
+  }
+}
+
+class PDFModulePage extends StatelessWidget {
+  final String pdfUrl;
+  final String title;
+  const PDFModulePage({Key? key, required this.pdfUrl, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: FutureBuilder<PDFDocument>(
+        future: getMoodlePdf(pdfUrl),
+          builder: (context, snapshot) {
+        if(snapshot.hasError) {
+          return Text(snapshot.error.toString());
+        }
+        if(snapshot.hasData) {
+          return PDFViewer(
+            document: snapshot.data!,
+            lazyLoad: false,
+            scrollDirection: Axis.vertical,
+          );
+        }
+        return LoadingScreen();
+      }),
+    );
+  }
+}
+
+
+enum MoodleType {
+  forum,
+  assign,
+  lti,
+  resource,
+  url,
+  label,
+  turnitintooltwo,
+  folder,
+  notype,
+}
+
+extension MoodleTypeExtension on MoodleType {
+  Icon get icon {
+    switch (this) {
+      case MoodleType.assign:
+        return const Icon(Icons.assignment, color: Colors.orange);
+      case MoodleType.forum:
+        return const Icon(Icons.forum, color: Colors.blue);
+      case MoodleType.lti:
+        return const Icon(Icons.extension, color: Colors.green);
+      case MoodleType.resource:
+        return const Icon(Icons.file_copy, color: Colors.tealAccent);
+      case MoodleType.url:
+        return const Icon(Icons.link, color: Colors.grey);
+      case MoodleType.label:
+        return const Icon(Icons.campaign, color: Colors.red);
+      case MoodleType.turnitintooltwo:
+        return const Icon(Icons.upload, color: Colors.red);
+      case MoodleType.folder:
+        return const Icon(Icons.folder, color: Colors.lightBlueAccent);
+      case MoodleType.notype:
+        return const Icon(Icons.image, color: Colors.blueGrey);
+      default:
+        return const Icon(Icons.image, color: Colors.blueGrey);
+    }
   }
 }

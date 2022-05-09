@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -30,7 +32,7 @@ class MoodleClass {
 class Teacher {
   String? alias;
   String name;
-  Image avatar;
+  String avatar;
   int id;
 
   Teacher({required this.name, this.alias, required this.avatar, required this.id});
@@ -44,20 +46,33 @@ class Teacher {
 
 Future<List<MoodleClass>> getClasses() async {
   final token = await getToken();
-  final userQueryHttps = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
-    "wstoken": token,
-    "wsfunction": "core_webservice_get_site_info",
-    "moodlewsrestformat": "json",
-  });
-  String userQuery = await read(userQueryHttps);
-  var userId = jsonDecode(userQuery);
-  final classesQueryHttps = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
-    "wstoken": token,
-    "wsfunction": "core_enrol_get_users_courses",
-    "userid": userId['userid'].toString(),
-    "moodlewsrestformat": "json",
-  });
-  String classesQuery = await read(classesQueryHttps);
+  const storage = FlutterSecureStorage();
+  final timer = await storage.read(key: "timeListStored");
+  String? classesQuery;
+  if(timer != null) {
+    if(int.parse(timer) - DateTime.now().millisecondsSinceEpoch < 216000000) {
+      classesQuery = await storage.read(key: "classList");
+      print("Loaded from Storage");
+    }
+  }
+  if(classesQuery == null) {
+    final userQueryHttps = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
+      "wstoken": token,
+      "wsfunction": "core_webservice_get_site_info",
+      "moodlewsrestformat": "json",
+    });
+    String userQuery = await read(userQueryHttps);
+    var userId = jsonDecode(userQuery);
+    final classesQueryHttps = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
+      "wstoken": token,
+      "wsfunction": "core_enrol_get_users_courses",
+      "userid": userId['userid'].toString(),
+      "moodlewsrestformat": "json",
+    });
+    classesQuery = await read(classesQueryHttps);
+    print("Loaded from Web");
+    storeClassList(classesQuery);
+  }
   var userClasses = jsonDecode(classesQuery);
   List<MoodleClass> classes = List.empty(growable: true);
 
@@ -70,29 +85,52 @@ Future<List<MoodleClass>> getClasses() async {
 }
 
 Future<MoodleClass> getClassFromId(int id) async {
+  const storage = FlutterSecureStorage();
   final token = await getToken();
-  final moodleClassQuery = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
-    "wstoken": token,
-    "wsfunction": "core_course_get_courses_by_field",
-    "field": "id",
-    "value": id.toString(),
-    "moodlewsrestformat": "json",
-  });
-  String moodleClass = await read(moodleClassQuery);
+  final classTimer = await storage.read(key: "storedClass${id}Time");
+  String? moodleClass;
+  if(classTimer != null) {
+    if(int.parse(classTimer) - DateTime.now().millisecondsSinceEpoch < 216000000) {
+      moodleClass = await storage.read(key: "class$id");
+      print("Loaded Class $id from Storage");
+    }
+  }
+  if(moodleClass == null) {
+    final moodleClassQuery = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
+      "wstoken": token,
+      "wsfunction": "core_course_get_courses_by_field",
+      "field": "id",
+      "value": id.toString(),
+      "moodlewsrestformat": "json",
+    });
+    moodleClass = await read(moodleClassQuery);
+    storeClassInfo(moodleClass, id);
+  }
   Map<String, dynamic> classInstance = jsonDecode(moodleClass)['courses'][0];
+  String? teacherInfo;
   int teacherID = classInstance['contacts'][0]['id'];
-  final teacherQuery = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
-    "wstoken": token,
-    "wsfunction": "core_user_get_users_by_field",
-    "field": "id",
-    "values[]": teacherID.toString(),
-    "moodlewsrestformat": "json",
-  });
-  String teacherRequest = await read(teacherQuery);
-  Map<String, dynamic> teacherData = jsonDecode(teacherRequest)[0];
+  final teacherTimer = await storage.read(key: "storedTeacher${teacherID}Time");
+  if(teacherTimer != null) {
+    if(int.parse(teacherTimer) - DateTime.now().millisecondsSinceEpoch < 216000000) {
+      teacherInfo = await storage.read(key: "teacher$teacherID");
+      print("Loaded Teacher $id from Storage");
+    }
+  }
+  if(teacherInfo == null) {
+    final teacherQuery = Uri.https("moodle.regis.org", "/webservice/rest/server.php", {
+      "wstoken": token,
+      "wsfunction": "core_user_get_users_by_field",
+      "field": "id",
+      "values[]": teacherID.toString(),
+      "moodlewsrestformat": "json",
+    });
+    teacherInfo = await read(teacherQuery);
+    storeTeacherInfo(teacherInfo, teacherID);
+  }
+  Map<String, dynamic> teacherData = jsonDecode(teacherInfo)[0];
   String teacherImg = teacherData['profileimageurl'] + '&token=$token';
   teacherImg = teacherImg.replaceFirst('/pluginfile.php', '/webservice/pluginfile.php');
-  Teacher teacher = Teacher(name: teacherData['fullname'], avatar: Image.network(teacherImg), id: teacherID);
+  Teacher teacher = Teacher(name: teacherData['fullname'], avatar: teacherImg, id: teacherID);
   String? imgBanner;
   try {
     imgBanner = classInstance['overviewfiles'][0]['fileurl'] + '?token=$token';
@@ -206,6 +244,12 @@ Future<String> getStoredClass(MoodleClass moodleClass) async {
   return "error";
 }
 
+Future<PDFDocument> getMoodlePdf(String url) async {
+  final token = await getToken();
+  PDFDocument doc = await PDFDocument.fromURL("$url&token=$token", cacheManager: CacheManager(Config("moodleDocs", stalePeriod: const Duration(days: 2), maxNrOfCacheObjects: 10)));
+  return doc;
+}
+
 void storeClassContent(String content, MoodleClass moodleClass) {
   const storage = FlutterSecureStorage();
   storage.write(key: "timeStampOf${moodleClass.id}", value: DateTime.now().millisecondsSinceEpoch.toString());
@@ -216,4 +260,16 @@ void storeClassList(String list) {
   const storage = FlutterSecureStorage();
   storage.write(key: "timeListStored", value: DateTime.now().millisecondsSinceEpoch.toString());
   storage.write(key: "classList", value: list);
+}
+
+void storeClassInfo(String classInfo, int id) {
+  const storage = FlutterSecureStorage();
+  storage.write(key: "storedClass${id}Time", value: DateTime.now().millisecondsSinceEpoch.toString());
+  storage.write(key: "class$id", value: classInfo);
+}
+
+void storeTeacherInfo(String classInfo, int teacherId) {
+  const storage = FlutterSecureStorage();
+  storage.write(key: "storedTeacher${teacherId}Time", value: DateTime.now().millisecondsSinceEpoch.toString());
+  storage.write(key: "teacher$teacherId", value: classInfo);
 }

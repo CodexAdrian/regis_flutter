@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../api/scheduleapi.dart';
 import '../components/base_components.dart';
+import '../components/schedule_components.dart';
 
 class Schedule extends StatefulWidget {
   const Schedule({Key? key}) : super(key: key);
@@ -13,11 +14,23 @@ class Schedule extends StatefulWidget {
 
 class _ScheduleState extends State<Schedule> {
   List<String> letterDays = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  late Map<String, ScheduleDay?> days;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+  }
+
+  loadSchedule() async {
+    days = await getWeeklySchedule();
+    setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    getScheduleDays();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -25,7 +38,8 @@ class _ScheduleState extends State<Schedule> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: text(
-              "Today is H day", theme.textTheme.headline2!,
+              "Today is H day",
+              theme.textTheme.headline2!,
             ),
           ),
           SizedBox(
@@ -40,7 +54,9 @@ class _ScheduleState extends State<Schedule> {
                         style: ElevatedButton.styleFrom(
                           primary: theme.cardColor,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+
+                        },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Center(
@@ -54,6 +70,36 @@ class _ScheduleState extends State<Schedule> {
                     ),
                   )
                   .toList(),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView(
+                children: [
+                  FutureBuilder<Map<String, ScheduleDay?>>(
+                    future: getWeeklySchedule(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        print(snapshot.error);
+                        return const Text("Error");
+                      } else if (snapshot.hasData) {
+                        var element = snapshot.data!.entries.first;
+                        return Column(children: [
+                          if (element.value != null)
+                            ScheduleCard(scheduleDay: element.value!)
+                          else
+                            const Card(
+                              child: Text("Non-Instructional School Day"),
+                            )
+                        ]);
+                      } else {
+                        return LoadingScreen();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],
